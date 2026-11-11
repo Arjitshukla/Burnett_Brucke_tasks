@@ -1,0 +1,17 @@
+{
+    "Rahul": {
+        "Python": 55.0,
+        "SQL": 65.0,
+        "Django": 99.0
+    },
+    "Arjit Shukla": {
+        "Python": 56.0,
+        "SQL": 78.0,
+        "Django": 90.0
+    },
+    "Sita": {
+        "Python": 67.0,
+        "SQL": 44.0,
+        "Django": 56.0
+    }
+}
