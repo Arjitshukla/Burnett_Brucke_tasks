@@ -1,43 +1,33 @@
-# Main Internships
+# Day 2 Tasks
 
-Simple workspace for internship practice tasks.
+Python practice scripts for Day 2 of the internship.
 
-## Contents
+## Files
 
-- `Day2/task_1_advanced_functions.py` - advanced functions practice
-- `Day2/task_2_file_handling.py` - employee management CLI using JSON file storage
-- `Day2/task_3_data_processing.py` - data processing practice
-- `employees.json` - employee data used by the file handling task
-
-## Employee Management Script
-
-`Day2/task_2_file_handling.py` provides a menu-based CLI to:
-
-- Add an employee
-- Display all employees
-- Search an employee by ID
-- Update department or salary
-- Delete an employee
-- Show total employee count
-
-Employee records are stored in `employees.json`.
+- `task_1_advanced_functions.py` - advanced functions: argument handling (`*args`, `**kwargs`), salary validation, execution-time decorator, salary statistics, and a closure for running totals.
+- `task_2_file_handling.py` - menu-based Employee Management System using `employees.json` for storage (add, display, search, update, delete, count).
+- `task_3_data_processing.py` - data processing on in-memory employee records using list/dict comprehensions, `map()`, `filter()`, `sorted()`, grouping, and aggregations.
+- `employees.json` - sample/working employee data for Task 2.
 
 ## Run
 
-From the workspace directory:
-### Task 1 :
+From this `Day2` directory:
+
+```powershell
+python task_1_advanced_functions.py
+python task_2_file_handling.py
+python task_3_data_processing.py
+```
+
+Or from the workspace root:
+
 ```powershell
 python Day2\task_1_advanced_functions.py
-```
-### Task 2 :
-```powershell
 python Day2\task_2_file_handling.py
-```
-### Task 3:
-```powershell
 python Day2\task_3_data_processing.py
 ```
+
 ## Notes
 
 - Requires Python 3.
-- `employees.json` must be present in the working directory when running the script (an empty or initial list is expected by the loader behavior).
+- Task 2 reads/writes `employees.json` from the current working directory; run it from the directory where that file is available (workspace root in this setup).

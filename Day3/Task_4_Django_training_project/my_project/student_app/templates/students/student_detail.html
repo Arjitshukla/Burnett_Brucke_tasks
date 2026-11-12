@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Management</title>
+</head>
+<body>
+
+    <h1>Student Management System</h1>
+ <a href="{% url 'add_student' %}">
+        Add New Student
+    </a>
+    <hr>
+    {% if messages %}
+    {% for message in messages %}
+        <p style="
+            color: white;
+            background-color: red;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        ">
+            {{ message }}
+        </p>
+    {% endfor %}
+{% endif %}
+
+    <h2>Total Students: {{total_count}}</h2>
+
+    <h2>Active Students</h2>
+
+    {% for student in active_students %}
+        <p>{{ student.name }} - {{ student.course }}</p>
+    {% empty %}
+        <p>No active students found.</p>
+    {% endfor %}
+
+    <hr>
+
+    <h2>All Students</h2>
+
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Age</th>
+                <th>Course</th>
+                <th>Marks</th>
+                <th>Status</th>
+                <th>Joined Date</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.age }}</td>
+                <td>{{ student.course }}</td>
+                <td>{{ student.marks }}</td>
+
+                <td>
+                    {% if student.marks >= 40 %}
+                        Pass
+                    {% else %}
+                        Fail
+                    {% endif %}
+                </td>
+
+                <td>{{ student.joined_date }}</td>
+
+                <td>
+                    {% if student.is_active %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="8">No students available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
