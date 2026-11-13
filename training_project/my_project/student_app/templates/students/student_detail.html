@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Details</title>
+</head>
+<body>
+
+    <h1>Student Details</h1>
+
+    <hr>
+
+    <p>Name: {{ student.name }}</p>
+
+    <p>Email: {{ student.email }}</p>
+
+    <p>Age: {{ student.age }}</p>
+
+    <p>Course: {{ student.course }}</p>
+
+    <p>Marks: {{ student.marks }}</p>
+
+    <p>Joined Date: {{ student.joined_date }}</p>
+
+    <p>
+        Active:
+        {% if student.is_active %}
+            Yes
+        {% else %}
+            No
+        {% endif %}
+    </p>
+
+    <p>
+        Result:
+        {% if student.marks >= 40 %}
+            Pass
+        {% else %}
+            Fail
+        {% endif %}
+    </p>
+
+    <hr>
+
+    <a href="{% url 'student_list' %}">
+        Back to Student List
+    </a>
+    <hr>
+    <a href="{% url 'edit_student' student.pk %}">
+    Edit Student
+</a>
+<a href="{% url 'delete_student' student.pk %}">
+    Delete Student
+</a>
+
+</body>
+</html>
