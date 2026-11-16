@@ -1,36 +1,26 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Student</title>
-</head>
-<body>
+{% extends 'students/base.html' %}
 
-    <h1>Add New Student</h1>
+{% block content %}
 
-    <a href="{% url 'student_list' %}">
-        Back to Student List
-    </a>
+<h1>Add New Student</h1>
 
-    <hr>
+<hr>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+<form method="POST">
+    {% csrf_token %}
 
-    <form method="POST">
+    {{ form.as_p }}
 
-        {% csrf_token %}
+    <button type="submit">
+        Add Student
+    </button>
+</form>
 
-        {{ form.as_p }}
+<hr>
 
-        <button type="submit">
-            Add Student
-        </button>
+<a href="{% url 'student_list' %}">
+    Back to Student List
+</a>
 
-    </form>
-
-</body>
-</html>
+{% endblock %}

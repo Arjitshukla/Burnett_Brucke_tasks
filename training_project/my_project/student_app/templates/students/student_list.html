@@ -1,97 +1,261 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Management</title>
-</head>
-<body>
+{% extends 'students/base.html' %}
+
+{% block content %}
+
+<style>
+    .container {
+        padding: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .student-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .student-table th {
+        background-color: #f2f2f2;
+    }
+
+    .student-table tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    .action-links a {
+        margin-right: 8px;
+    }
+
+    .add-btn {
+        display: inline-block;
+        padding: 10px 10px;
+        background-color: #2563eb;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .section {
+        margin-top: 25px;
+    }
+</style>
+
+<div class="container">
 
     <h1>Student Management System</h1>
- <a href="{% url 'add_student' %}">
+
+    <a class="add-btn" href="{% url 'add_student' %}">
         Add New Student
     </a>
+
     <hr>
+
     {% if messages %}
-    {% for message in messages %}
-        <p style="
-            color: white;
-            background-color: red;
-            padding: 12px;
-            border-radius: 5px;
-            font-weight: bold;
-        ">
-            {{ message }}
-        </p>
-    {% endfor %}
-{% endif %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
 
-    <h2>Total Students: {{total_count}}</h2>
+    <h2>Total Students: {{ total_count }}</h2>
 
-    <h2>Active Students</h2>
+    <div class="section">
+        <h2>Active Students</h2>
 
-    {% for student in active_students %}
-        <p>{{ student.name }} - {{ student.course }}</p>
-    {% empty %}
-        <p>No active students found.</p>
-    {% endfor %}
+        {% for student in active_students %}
+            <p>
+                <strong>{{ student.name }}</strong> -
+
+                {% for course in student.courses.all %}
+                    {{ course.course_name }}
+                    {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    No courses assigned
+                {% endfor %}
+            </p>
+        {% empty %}
+            <p>No active students found.</p>
+        {% endfor %}
+    </div>
 
     <hr>
 
-    <h2>All Students</h2>
+    <div class="section">
+        <h2>All Students</h2>
 
-    <table border="1" cellpadding="10">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Age</th>
-                <th>Course</th>
-                <th>Marks</th>
-                <th>Status</th>
-                <th>Joined Date</th>
-                <th>Active</th>
-            </tr>
-        </thead>
+<form method="GET">
 
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.name }}</td>
-                <td>{{ student.email }}</td>
-                <td>{{ student.age }}</td>
-                <td>{{ student.course }}</td>
-                <td>{{ student.marks }}</td>
-               
+    <!-- Search -->
+    <input
+        type="text"
+        name="search"
+        placeholder="Search by name, email or course..."
+        value="{{ search }}"
+    >
 
-                <td>
-                    {% if student.marks >= 40 %}
-                        Pass
-                    {% else %}
-                        Fail
-                    {% endif %}
-                </td>
+    <!-- Department Filter -->
+    <select name="department">
+        <option value="">All Departments</option>
 
-                <td>{{ student.joined_date }}</td>
+        {% for department in departments %}
+            <option value="{{ department.id }}"
+                {% if selected_department == department.id|stringformat:"s" %}
+                    selected
+                {% endif %}>
+                {{ department.name }}
+            </option>
+        {% endfor %}
+    </select>
 
-                <td>
-                    {% if student.is_active %}
-                        Yes
-                    {% else %}
-                        No
-                    {% endif %}
-                </td>
-                 <td><a href="{% url 'student_detail' student.pk %}">
-    View Details
-</a></td>
-            </tr>
+    <!-- Course Filter -->
+    <select name="course">
+        <option value="">All Courses</option>
 
-            {% empty %}
-            <tr>
-                <td colspan="8">No students available.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% for course in courses %}
+            <option value="{{ course.id }}"
+                {% if selected_course == course.id|stringformat:"s" %}
+                    selected
+                {% endif %}>
+                {{ course.course_name }}
+            </option>
+        {% endfor %}
+    </select>
 
-</body>
-</html>
+    <!-- Active Status -->
+    <select name="status">
+        <option value="">All Status</option>
+        <option value="active"
+            {% if selected_status == "active" %}selected{% endif %}>
+            Active
+        </option>
+        <option value="inactive"
+            {% if selected_status == "inactive" %}selected{% endif %}>
+            Inactive
+        </option>
+    </select>
+
+    <!-- Pass / Fail -->
+    <select name="result">
+        <option value="">All Results</option>
+        <option value="pass"
+            {% if selected_result == "pass" %}selected{% endif %}>
+            Pass
+        </option>
+        <option value="fail"
+            {% if selected_result == "fail" %}selected{% endif %}>
+            Fail
+        </option>
+    </select>
+
+    <button type="submit">Apply Filters</button>
+
+    <a href="{% url 'student_list' %}">Reset</a>
+
+</form>
+
+
+        <table class="student-table">
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Department</th>
+                    <th>Courses</th>
+                    <th>Course Count</th>
+                    <th>Marks</th>
+                    <th>Result</th>
+                    <th>Joined Date</th>
+                    <th>Active Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for student in students %}
+                    <tr>
+
+                        <td>{{ student.name }}</td>
+
+                        <td>{{ student.email }}</td>
+
+                        <td>{{ student.age }}</td>
+
+                        <td>
+                            {{ student.department|default:"Not assigned" }}
+                        </td>
+
+                        <td>
+                            {% for course in student.courses.all %}
+                                {{ course.course_name }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                No courses assigned
+                            {% endfor %}
+                        </td>
+
+                        <td>{{ student.courses.count }}</td>
+
+                        <td>{{ student.marks }}</td>
+
+                        <td>
+                            {% if student.marks >= 40 %}
+                                Pass
+                            {% else %}
+                                Fail
+                            {% endif %}
+                        </td>
+
+                        <td>{{ student.joined_date }}</td>
+
+                        <td>
+                            {% if student.is_active %}
+                                Active
+                            {% else %}
+                                Inactive
+                            {% endif %}
+                        </td>
+
+                        <td class="action-links">
+
+                            <a href="{% url 'student_detail' student.pk %}">
+                                View
+                            </a>
+
+                            <a href="{% url 'edit_student' student.pk %}">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'delete_student' student.pk %}">
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+                    <tr>
+                        <td colspan="11">
+                            No students available.
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

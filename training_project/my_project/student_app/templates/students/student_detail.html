@@ -1,57 +1,77 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Details</title>
-</head>
-<body>
+{% extends 'students/base.html' %}
 
-    <h1>Student Details</h1>
+{% block content %}
 
-    <hr>
+<h1>Student Details</h1>
 
-    <p>Name: {{ student.name }}</p>
+<hr>
 
-    <p>Email: {{ student.email }}</p>
+<h3>Personal Information</h3>
 
-    <p>Age: {{ student.age }}</p>
+<p><strong>Name:</strong> {{ student.name }}</p>
 
-    <p>Course: {{ student.course }}</p>
+<p><strong>Email:</strong> {{ student.email }}</p>
 
-    <p>Marks: {{ student.marks }}</p>
+<p><strong>Age:</strong> {{ student.age }}</p>
 
-    <p>Joined Date: {{ student.joined_date }}</p>
+<p><strong>Department:</strong>
+    {{ student.department|default:"Not assigned" }}
+</p>
 
-    <p>
-        Active:
-        {% if student.is_active %}
-            Yes
-        {% else %}
-            No
-        {% endif %}
-    </p>
+<h3>Course Information</h3>
 
-    <p>
-        Result:
-        {% if student.marks >= 40 %}
-            Pass
-        {% else %}
-            Fail
-        {% endif %}
-    </p>
+<p><strong>Courses:</strong></p>
 
-    <hr>
+<ul>
+    {% for course in student.courses.all %}
+        <li>{{ course.course_name }}</li>
+    {% empty %}
+        <li>No courses assigned.</li>
+    {% endfor %}
+</ul>
 
-    <a href="{% url 'student_list' %}">
-        Back to Student List
-    </a>
-    <hr>
-    <a href="{% url 'edit_student' student.pk %}">
-    Edit Student
-</a>
-<a href="{% url 'delete_student' student.pk %}">
-    Delete Student
-</a>
+<p><strong>Total Courses:</strong> {{ student.courses.count }}</p>
 
-</body>
-</html>
+<hr>
+
+<h3>Academic Information</h3>
+
+<p><strong>Marks:</strong> {{ student.marks }}</p>
+
+<p>
+    <strong>Result:</strong>
+    {% if student.marks >= 40 %}
+        Pass
+    {% else %}
+        Fail
+    {% endif %}
+</p>
+
+<p>
+    <strong>Joined Date:</strong> {{ student.joined_date }}
+</p>
+
+<p>
+    <strong>Active Status:</strong>
+    {% if student.is_active %}
+        Active
+    {% else %}
+        Inactive
+    {% endif %}
+</p>
+
+<hr>
+
+<a href="{% url 'student_list' %}">Back to Student List</a>
+
+|
+
+<a href="{% url 'edit_student' student.pk %}">Edit Student</a>
+
+{% if request.user.is_staff %}
+    |
+    <a href="{% url 'delete_student' student.pk %}">Delete Student</a>
+{% endif %}
+
+{% endblock %}

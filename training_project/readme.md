@@ -7,7 +7,7 @@ A Django-based web application to manage student records with complete CRUD func
 ### Clone Repository
 ```bash
 git clone <repository-url>
-cd day3/my_project
+cd main Interships\training_project\my_project
 ```
 
 ### Create and Activate Virtual Environment
@@ -91,4 +91,4 @@ Open: http://127.0.0.1:8000/
 - **Framework:** Django
 - **Language:** Python
 - **Database:** SQLite
-- **Status:** Tasks 4, 5 and 6 Completed
+- **Status:** all task completd day-3 

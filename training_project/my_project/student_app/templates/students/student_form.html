@@ -1,20 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Student</title>
-</head>
-<body>
+
+{% extends 'students/base.html' %}
+
+{% block content %}
 
 <h1>Edit Student</h1>
 
+<hr>
+
 <form method="POST">
     {% csrf_token %}
+
     {{ form.as_p }}
 
     <button type="submit">Update Student</button>
 </form>
 
-<a href="{% url 'student_detail' student.pk %}">Back to Details</a>
+<hr>
 
-</body>
-</html>
+<a href="{% url 'student_detail' student.pk %}">
+    Back to Student Details
+</a>
+
+|
+
+<a href="{% url 'student_list' %}">
+    Back to Student List
+</a>
+
+{% endblock %}
