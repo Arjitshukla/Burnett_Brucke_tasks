@@ -7,8 +7,9 @@
 
 <hr>
 
-<form method="POST">
+<form method="POST" novalidate>
     {% csrf_token %}
+    {% include 'students/includes/form_errors.html' %}
 
     {{ form.as_p }}
 

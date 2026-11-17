@@ -1,259 +1,317 @@
 
 {% extends 'students/base.html' %}
 
+{% block title %}Student Management System{% endblock %}
+
 {% block content %}
 
-<style>
-    .container {
-        padding: 20px;
-        font-family: Arial, sans-serif;
-    }
+<div class="container-fluid py-4">
 
-    .student-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Student Management System</h2>
 
-    .student-table th,
-    .student-table td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    .student-table th {
-        background-color: #f2f2f2;
-    }
-
-    .student-table tr:hover {
-        background-color: #f9f9f9;
-    }
-
-    .action-links a {
-        margin-right: 8px;
-    }
-
-    .add-btn {
-        display: inline-block;
-        padding: 10px 10px;
-        background-color: #2563eb;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-    }
-
-    .section {
-        margin-top: 25px;
-    }
-</style>
-
-<div class="container">
-
-    <h1>Student Management System</h1>
-
-    <a class="add-btn" href="{% url 'add_student' %}">
-        Add New Student
+        {% if request.user.profile.role == 'admin' %}
+    <a class="btn btn-primary" href="{% url 'add_student' %}">
+        + Add New Student
     </a>
-
-    <hr>
-
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
-
-    <h2>Total Students: {{ total_count }}</h2>
-
-    <div class="section">
-        <h2>Active Students</h2>
-
-        {% for student in active_students %}
-            <p>
-                <strong>{{ student.name }}</strong> -
-
-                {% for course in student.courses.all %}
-                    {{ course.course_name }}
-                    {% if not forloop.last %}, {% endif %}
-                {% empty %}
-                    No courses assigned
-                {% endfor %}
-            </p>
-        {% empty %}
-            <p>No active students found.</p>
-        {% endfor %}
+{% endif %}
     </div>
 
-    <hr>
+    <!-- Total Students -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Students</h6>
+                    <h2 class="text-primary">{{ total_count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="section">
-        <h2>All Students</h2>
+    <!-- Active Students -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Active Students</h5>
+        </div>
 
-<form method="GET">
+        <div class="card-body">
+            <div class="row">
 
-    <!-- Search -->
-    <input
-        type="text"
-        name="search"
-        placeholder="Search by name, email or course..."
-        value="{{ search }}"
-    >
+                {% for student in active_students %}
+                    <div class="col-md-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h6>{{ student.name }}</h6>
 
-    <!-- Department Filter -->
-    <select name="department">
-        <option value="">All Departments</option>
+                            <p class="mb-1">
+                                <strong>Courses:</strong>
 
-        {% for department in departments %}
-            <option value="{{ department.id }}"
-                {% if selected_department == department.id|stringformat:"s" %}
-                    selected
-                {% endif %}>
-                {{ department.name }}
-            </option>
-        {% endfor %}
-    </select>
+                                {% for course in student.courses.all %}
+                                    {{ course.course_name }}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    No courses assigned
+                                {% endfor %}
+                            </p>
 
-    <!-- Course Filter -->
-    <select name="course">
-        <option value="">All Courses</option>
-
-        {% for course in courses %}
-            <option value="{{ course.id }}"
-                {% if selected_course == course.id|stringformat:"s" %}
-                    selected
-                {% endif %}>
-                {{ course.course_name }}
-            </option>
-        {% endfor %}
-    </select>
-
-    <!-- Active Status -->
-    <select name="status">
-        <option value="">All Status</option>
-        <option value="active"
-            {% if selected_status == "active" %}selected{% endif %}>
-            Active
-        </option>
-        <option value="inactive"
-            {% if selected_status == "inactive" %}selected{% endif %}>
-            Inactive
-        </option>
-    </select>
-
-    <!-- Pass / Fail -->
-    <select name="result">
-        <option value="">All Results</option>
-        <option value="pass"
-            {% if selected_result == "pass" %}selected{% endif %}>
-            Pass
-        </option>
-        <option value="fail"
-            {% if selected_result == "fail" %}selected{% endif %}>
-            Fail
-        </option>
-    </select>
-
-    <button type="submit">Apply Filters</button>
-
-    <a href="{% url 'student_list' %}">Reset</a>
-
-</form>
-
-
-        <table class="student-table">
-
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Age</th>
-                    <th>Department</th>
-                    <th>Courses</th>
-                    <th>Course Count</th>
-                    <th>Marks</th>
-                    <th>Result</th>
-                    <th>Joined Date</th>
-                    <th>Active Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for student in students %}
-                    <tr>
-
-                        <td>{{ student.name }}</td>
-
-                        <td>{{ student.email }}</td>
-
-                        <td>{{ student.age }}</td>
-
-                        <td>
-                            {{ student.department|default:"Not assigned" }}
-                        </td>
-
-                        <td>
-                            {% for course in student.courses.all %}
-                                {{ course.course_name }}
-                                {% if not forloop.last %}, {% endif %}
-                            {% empty %}
-                                No courses assigned
-                            {% endfor %}
-                        </td>
-
-                        <td>{{ student.courses.count }}</td>
-
-                        <td>{{ student.marks }}</td>
-
-                        <td>
-                            {% if student.marks >= 40 %}
-                                Pass
-                            {% else %}
-                                Fail
-                            {% endif %}
-                        </td>
-
-                        <td>{{ student.joined_date }}</td>
-
-                        <td>
-                            {% if student.is_active %}
-                                Active
-                            {% else %}
-                                Inactive
-                            {% endif %}
-                        </td>
-
-                        <td class="action-links">
-
-                            <a href="{% url 'student_detail' student.pk %}">
-                                View
-                            </a>
-
-                            <a href="{% url 'edit_student' student.pk %}">
-                                Edit
-                            </a>
-
-                            <a href="{% url 'delete_student' student.pk %}">
-                                Delete
-                            </a>
-
-                        </td>
-
-                    </tr>
-
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
                 {% empty %}
-                    <tr>
-                        <td colspan="11">
-                            No students available.
-                        </td>
-                    </tr>
+                    <div class="col-12">
+                        <p class="text-muted mb-0">
+                            No active students found.
+                        </p>
+                    </div>
                 {% endfor %}
 
-            </tbody>
+            </div>
+        </div>
+    </div>
 
-        </table>
+    <!-- Search and Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Search and Filter Students</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="GET" class="row g-3">
+
+                <!-- Search -->
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        placeholder="Name, email or course..."
+                        value="{{ search }}"
+                    >
+                </div>
+
+                <!-- Department -->
+                <div class="col-md-2">
+                    <label class="form-label">Department</label>
+
+                    <select name="department" class="form-select">
+                        <option value="">All Departments</option>
+
+                        {% for department in departments %}
+                            <option
+                                value="{{ department.id }}"
+                                {% if selected_department == department.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ department.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Course -->
+                <div class="col-md-2">
+                    <label class="form-label">Course</label>
+
+                    <select name="course" class="form-select">
+                        <option value="">All Courses</option>
+
+                        {% for course in courses %}
+                            <option
+                                value="{{ course.id }}"
+                                {% if selected_course == course.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ course.course_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+
+                        <option value="active"
+                            {% if selected_status == "active" %}selected{% endif %}>
+                            Active
+                        </option>
+
+                        <option value="inactive"
+                            {% if selected_status == "inactive" %}selected{% endif %}>
+                            Inactive
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Result -->
+                <div class="col-md-1">
+                    <label class="form-label">Result</label>
+
+                    <select name="result" class="form-select">
+                        <option value="">All</option>
+
+                        <option value="pass"
+                            {% if selected_result == "pass" %}selected{% endif %}>
+                            Pass
+                        </option>
+
+                        <option value="fail"
+                            {% if selected_result == "fail" %}selected{% endif %}>
+                            Fail
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Apply
+                    </button>
+
+                    <a href="{% url 'student_list' %}"
+                       class="btn btn-secondary">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- All Students Table -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">All Students</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-striped table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Age</th>
+                            <th>Department</th>
+                            <th>Courses</th>
+                            <th>Course Count</th>
+                            <th>Marks</th>
+                            <th>Result</th>
+                            <th>Joined Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                            <tr>
+
+                                <td>{{ student.name }}</td>
+
+                                <td>{{ student.email }}</td>
+
+                                <td>{{ student.age }}</td>
+
+                                <td>
+                                    {{ student.department|default:"Not assigned" }}
+                                </td>
+
+                                <td>
+                                    {% for course in student.courses.all %}
+                                        {{ course.course_name }}
+                                        {% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        <span class="text-muted">
+                                            No courses assigned
+                                        </span>
+                                    {% endfor %}
+                                </td>
+
+                                <td>{{ student.courses.count }}</td>
+
+                                <td>{{ student.marks }}</td>
+
+                                <td>
+                                    {% if student.marks >= 40 %}
+                                        <span class="badge bg-success">Pass</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Fail</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ student.joined_date }}</td>
+
+                                <td>
+                                    {% if student.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <!-- View: All roles -->
+                                        <a href="{% url 'student_detail' student.pk %}"
+                                        class="btn btn-sm btn-info">
+                                            View
+                                        </a>
+
+                                        <!-- Edit and Delete: Admin only -->
+                                        {% if request.user.profile.role == 'admin' %}
+
+                                            <a href="{% url 'edit_student' student.pk %}"
+                                            class="btn btn-sm btn-warning">
+                                                Edit
+                                            </a>
+
+                                            <a href="{% url 'delete_student' student.pk %}"
+                                            class="btn btn-sm btn-danger">
+                                                Delete
+                                            </a>
+
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="11"
+                                    class="text-center text-muted py-4">
+                                    No students available.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        <!-- Pagination -->
+            {% include 'students/includes/pagination.html' %}
+        </div>
     </div>
 
 </div>

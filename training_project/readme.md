@@ -68,7 +68,7 @@ Open: http://127.0.0.1:8000/
 - Used separate views, URLs and templates.
 - Implemented redirects and validation error handling.
 
-## 6. Topics Learned
+## 7. Topics Learned
 
 - Django Models, ORM and Migrations.
 - Django Admin and Superuser.
@@ -80,15 +80,37 @@ Open: http://127.0.0.1:8000/
 - Django Messages Framework.
 - Redirect and Render.
 
-## 7. Pending Work
+## Role and Permission Matrix
 
-- Review and test the complete project.
-- Fix remaining issues.
-- Improve UI design.
+The Student Management System uses role-based access control (RBAC) with three roles: Administrator, Trainer, and Student.
 
-## Project Information
+| Feature / Permission | Administrator | Trainer | Student |
+|---|:---:|:---:|:---:|
+| Manage Students | ✅ | ❌ | ❌ |
+| Manage Trainers | ✅ | ❌ | ❌ |
+| Manage Courses | ✅ | ❌ | ❌ |
+| Manage Users | ✅ | ❌ | ❌ |
+| Access Admin Dashboard | ✅ | ❌ | ❌ |
+| View Assigned Courses | ✅ | ✅ | Own Courses |
+| View Assigned Students | ✅ | ✅ | ❌ |
+| Update Student Marks | ✅ | ✅ | ❌ |
+| Add Student Feedback | ✅ | ✅ | ❌ |
+| View Own Profile | ✅ | ❌ | ✅ |
+| View Own Marks | ✅ | ❌ | ✅ |
+| View Visible Feedback | ✅ | ❌ | ✅ |
+| Access Audit Logs | ✅ | ❌ | ❌ |
 
-- **Framework:** Django
-- **Language:** Python
-- **Database:** SQLite
-- **Status:** all task completd day-3 
+### Access Control
+
+- **Administrator:** Has administrative access to manage students, trainers, courses, users, dashboards, and audit logs.
+- **Trainer:** Can view assigned courses and students, update student marks, and add feedback.
+- **Student:** Can view only their own profile, enrolled courses, marks, and visible feedback.
+
+### Security Implementation
+
+- Role-based access is managed through the `UserProfile` model.
+- Students are linked to Django User accounts.
+- The `role_required` decorator protects role-specific views.
+- Unauthorized requests return HTTP 403.
+- Object ownership is checked to prevent unauthorized access through URL ID manipulation.
+- Permissions are validated in backend views, not only by hiding template buttons.

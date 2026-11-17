@@ -1,6 +1,6 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib import messages
-from .models import Student,Department, Course
+from .models import Student,Department, Course, UserProfile,StudentProfile
 from .forms import StudentForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -9,7 +9,35 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db.models import Avg,Q
+from django.core.paginator import Paginator
+from django.http import HttpResponseForbidden
+from functools import wraps
 
+# Create role_required decorator
+from django.http import HttpResponseForbidden
+from functools import wraps
+
+
+def role_required(allowed_roles):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+
+            if not request.user.is_authenticated:
+                return redirect('login')
+
+            try:
+                role = request.user.profile.role
+            except UserProfile.DoesNotExist:
+                return HttpResponseForbidden("Access Denied")
+
+            if role not in allowed_roles:
+                return HttpResponseForbidden("You are not authorized!")
+
+            return view_func(request, *args, **kwargs)
+
+        return wrapper
+    return decorator
 
 # Create your views here.
 def home(request):
@@ -21,7 +49,8 @@ def about(request):
 
 @login_required
 def student_list(request):
-    students = Student.objects.all()
+    # Get only the logged-in student's record
+    students = Student.objects.filter(user=request.user)
     active_students = Student.objects.filter(is_active=True)
     total_students = Student.objects.count()
 
@@ -60,9 +89,14 @@ def student_list(request):
     elif result == 'fail':
         students = students.filter(marks__lt=40)
 
+    #pagination Implements
+    paginator = Paginator(students, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'students': students,
+        'students': page_obj,
+        'page_obj': page_obj,
         'active_students': active_students,
         'total_count': total_students,
         'departments': Department.objects.all(),
@@ -76,6 +110,7 @@ def student_list(request):
     return render (request, 'students/student_list.html', context)
 
 @login_required
+@role_required(['admin'])
 def add_student(request):
     if request.method == "POST":
         form = StudentForm(request.POST)
@@ -92,16 +127,18 @@ def add_student(request):
     return render( request, "students/add_student.html",{"form": form} )
 
 @login_required
+
 def student_details(request,pk):
-    student = get_object_or_404(Student,pk=pk)
+    student = get_object_or_404(Student,pk=pk,user=request.user)
     context = {'student':student}
     return render(
-        request,
+        request,    
         "students/student_detail.html",
         context
     )
 
 @login_required
+@role_required(['admin'])
 def edit_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
@@ -119,6 +156,7 @@ def edit_student(request, pk):
     return render(request, "students/student_form.html", {"form": form, "student": student})
 
 @staff_member_required
+@role_required(['admin'])
 def delete_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
@@ -196,12 +234,33 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect("/students/")
+
+            # Role-based redirect
+            try:
+                role = user.profile.role
+
+                if role == 'admin':
+                    return redirect('admin_dashboard')
+
+                elif role == 'trainer':
+                    return redirect('trainer_dashboard')
+
+                elif role == 'student':
+                    return redirect('student_dashboard')
+
+                else:
+                    messages.error(request, "Invalid user role.")
+                    return redirect('login')
+
+            except UserProfile.DoesNotExist:
+                messages.error(request, "User profile not found.")
+                return redirect('login')
 
         else:
             messages.error(request, "Invalid username or password.")
 
     return render(request, "students/login.html")
+
 
 
 def logout_view(request):
@@ -246,4 +305,97 @@ def dashboard(request):
         request,
         "students/dashboard.html",
         context
+    )
+
+# Admin_dashboard
+@login_required
+@role_required(['admin'])
+def admin_dashboard(request):
+
+    context = {
+        'total_users': User.objects.count(),
+        'total_students': Student.objects.count(),
+        'total_courses': Course.objects.count(),
+
+        'recent_users': User.objects.order_by('-date_joined')[:5],
+        'recent_students': Student.objects.order_by('-id')[:5],
+        'recent_courses': Course.objects.order_by('-id')[:5],
+    }
+
+    return render(
+        request,
+        'students/dashboards/admin_dashboard.html',
+        context
+    )
+
+
+# trainer dashboard
+@login_required
+@role_required(['trainer'])
+def trainer_dashboard(request):
+
+    courses = Course.objects.filter(
+        trainer=request.user
+    )
+
+    students = Student.objects.filter(
+        courses__trainer=request.user
+    ).distinct()
+
+    context = {
+        'courses': courses,
+        'students': students,
+        'total_courses': courses.count(),
+        'total_students': students.count(),
+    }
+
+    return render(
+        request,
+        'students/dashboards/trainer_dashboard.html',
+        context
+    )
+
+# Student dashboard
+@login_required
+@role_required(['student'])
+def student_dashboard(request):
+
+    try:
+        student = request.user.student_record
+    except Student.DoesNotExist:
+        student = None
+
+    profile_completion = 0
+
+    if student:
+        try:
+            profile = student.profile
+        except StudentProfile.DoesNotExist:
+            profile = None
+
+        fields = [
+            student.name,
+            student.email,
+            student.age,
+            student.department,
+            profile.phone if profile else None,
+            profile.address if profile else None,
+            profile.date_of_birth if profile else None,
+        ]
+
+        completed_fields = sum(
+            1 for field in fields if field
+        )
+
+        profile_completion = round(
+            (completed_fields / len(fields)) * 100
+        )
+
+    return render(
+        request,
+        'students/dashboards/student_dashboard.html',
+        {
+            'student': student,
+            'profile_completion': profile_completion,
+        }
     )

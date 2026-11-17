@@ -1,0 +1,80 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Student Dashboard</h2>
+    <p>Welcome, {{ request.user.username }}!</p>
+
+    {% if student %}
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h5>{{ student.name }}</h5>
+
+                <p>Email: {{ student.email }}</p>
+                <p>Department: {{ student.department }}</p>
+                <p>Marks: {{ student.marks }}</p>
+
+                {% if student.marks >= 40 %}
+                    <span class="badge bg-success">Pass</span>
+                {% else %}
+                    <span class="badge bg-danger">Fail</span>
+                {% endif %}
+
+                <hr>
+
+                <h5>Profile Completion</h5>
+
+                <div class="progress">
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        style="width: {{ profile_completion }}%;"
+                        aria-valuenow="{{ profile_completion }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100">
+
+                        {{ profile_completion }}%
+
+                    </div>
+                </div>
+               <hr>
+
+
+<h5>Course Performance</h5>
+
+<div class="progress">
+    <div
+        class="progress-bar bg-success"
+        role="progressbar"
+        style="width: {{ student.marks }}%;"
+        aria-valuenow="{{ student.marks }}"
+        aria-valuemin="0"
+        aria-valuemax="100">
+
+        {{ student.marks }}%
+
+    </div>
+</div>
+
+            </div>
+        </div>
+        
+
+    {% else %}
+
+        <div class="alert alert-warning">
+            No student record is linked to your account.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
