@@ -89,7 +89,20 @@ class UserProfile(models.Model):
         choices=ROLE_CHOICES,
         default='student'
     )
+    # to prevent multiple password attempt
+    failed_login_attempts = models.PositiveIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
+# AuditLog model
+class AuditLog(models.Model):
+
+    username = models.CharField(max_length=150)
+    event = models.CharField(max_length=100)
+    details = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.username} - {self.event}"

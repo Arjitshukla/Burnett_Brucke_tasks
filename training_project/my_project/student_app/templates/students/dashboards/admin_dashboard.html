@@ -61,6 +61,7 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Date Joined</th>
+                        <th>Last Login</th>
                     </tr>
                 </thead>
 
@@ -80,8 +81,20 @@
                                 <span class="badge bg-success">Student</span>
                             {% endif %}
                         </td>
-
-                        <td>{{ user.date_joined|date:"d M Y" }}</td>
+                        <td>
+                            {% if user.last_login %}
+                                {{ user.last_login|date:"d M Y, h:i A" }}
+                            {% else %}
+                                Never logged in
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.last_login %}
+                                {{ user.last_login|date:"d M Y, h:i A" }}
+                            {% else %}
+                                Never logged in
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

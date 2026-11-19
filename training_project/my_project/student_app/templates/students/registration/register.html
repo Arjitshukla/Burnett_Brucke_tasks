@@ -1,0 +1,136 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}User Registration{% endblock %}
+
+{% block content %}
+
+<div class="container d-flex justify-content-center mt-5">
+<div class="card shadow" style="width: 100%; max-width: 500px;">
+    <div class="card-header text-center">
+            <h2>Create Account</h2>
+        </div>
+    <div class="card-body">
+    <form method="POST" novalidate>
+        {% csrf_token %}
+        {% if non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+          {% endif %}
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-control"
+                value="{{ request.POST.username|default:'' }}"
+                required
+            >
+            {% if errors.username %}
+            <div class="text-danger small mt-1">
+                {{ errors.username }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-control"
+                value="{{ request.POST.email|default:'' }}"
+                required
+            >
+            {% if errors.email %}
+            <div class="text-danger small mt-1">
+                {{ errors.email }}
+            </div>
+            {% endif %}
+        </div>
+
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <div class="alert alert-info">
+            <strong>Password Requirements:</strong>
+            <ul class="mb-0">
+                <li>Password should not be too similar to your personal information.</li>
+                <li>Password must contain at least 8 characters.</li>
+                <li>Password should not be commonly used.</li>
+                <li>Password cannot be entirely numeric.</li>
+            </ul>
+            </div>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control"
+                required
+            >
+            {% if errors.password %}
+                <div class="text-danger small mt-1" style="white-space: normal; overflow-wrap: break-word;">
+                    {% for error in errors.password %}
+                        <p class="mb-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">
+                Confirm Password
+            </label>
+            <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                class="form-control"
+                required
+            >
+            {% if errors.confirm_password %}
+                <div class="text-danger small mt-1">
+                    {{ errors.confirm_password }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="role" class="form-label">Select Role</label>
+        <select id="role" name="role"class="form-select" required>
+            <option value="student"
+                {% if request.POST.role == 'student' %}selected{% endif %}>
+                Student
+            </option>
+            <option value="trainer"
+                {% if request.POST.role == 'trainer' %}selected{% endif %}>
+                Trainer
+             </option>
+        </select>
+            {% if errors.role %}
+                <div class="text-danger small mt-1">
+                    {{ errors.role }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Register
+        </button>
+
+        <a href="{% url 'login' %}" class="btn btn-secondary w-100 mt-2">
+            Back to Login
+        </a>
+
+    </form>
+    </div>
+</div>
+</div>
+
+{% endblock %}

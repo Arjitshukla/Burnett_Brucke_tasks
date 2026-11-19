@@ -1,6 +1,8 @@
+from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib import messages
-from .models import Student,Department, Course, UserProfile,StudentProfile
+from .models import Student,Department, Course, UserProfile,StudentProfile,AuditLog
 from .forms import StudentForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -12,10 +14,7 @@ from django.db.models import Avg,Q
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from functools import wraps
-
-# Create role_required decorator
-from django.http import HttpResponseForbidden
-from functools import wraps
+# from django.contrib.auth.views import PasswordChangeView
 
 
 def role_required(allowed_roles):
@@ -50,9 +49,20 @@ def about(request):
 @login_required
 def student_list(request):
     # Get only the logged-in student's record
-    students = Student.objects.filter(user=request.user)
-    active_students = Student.objects.filter(is_active=True)
-    total_students = Student.objects.count()
+    role = request.user.profile.role
+
+    if role == 'admin' or role == 'trainer':
+        base_students = Student.objects.all()
+
+    elif role == 'student':
+        base_students = Student.objects.filter(user=request.user)
+
+    else:
+        return HttpResponseForbidden("Access Denied")
+
+    students = base_students
+    active_students = base_students.filter(is_active=True)
+    total_students = base_students.count()
 
      # Get filter values from URL
     search = request.GET.get('search', '').strip()
@@ -128,14 +138,29 @@ def add_student(request):
 
 @login_required
 
-def student_details(request,pk):
-    student = get_object_or_404(Student,pk=pk,user=request.user)
-    context = {'student':student}
-    return render(
-        request,    
-        "students/student_detail.html",
-        context
-    )
+@login_required
+def student_details(request, pk):
+
+    role = request.user.profile.role
+
+    if role in ['admin', 'trainer']:
+        student = get_object_or_404(Student, pk=pk)
+
+    elif role == 'student':
+        student = get_object_or_404(
+            Student,
+            pk=pk,
+            user=request.user
+        )
+
+    else:
+        return HttpResponseForbidden("Access Denied")
+
+    context = {
+        'student': student
+    }
+
+    return render(request, "students/student_detail.html", context)
 
 @login_required
 @role_required(['admin'])
@@ -181,50 +206,150 @@ def register_view(request):
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("confirm_password", "")
+        role = request.POST.get("role", "").strip()
+
+        errors = {}
+        non_field_errors = []
 
         # 1. Empty field validation
-        if not username or not email or not password or not confirm_password:
-            messages.error(request, "All fields are required.")
-            return redirect("register")
+        if not username:
+            errors['username'] = "Username is required."
+
+        if not email:
+            errors['email'] = "Email is required."
+
+        if not password:
+            errors['password'] = ["Password is required."]
+
+        if not confirm_password:
+            errors['confirm_password'] = "Confirm password is required."
+
+        if errors:
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
 
         # 2. Password matching validation
         if password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return redirect("register")
+            errors['confirm_password'] = "Passwords do not match."
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
 
         # 3. Duplicate username validation
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists.")
-            return redirect("register")
+            errors['username'] = "Username already exists."
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
 
-        # 4. Password strength validation
+        # 4. Duplicate email validation
+        if User.objects.filter(email__iexact=email).exists():
+            errors['email'] = "Email already exists."
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
+
+        # 5. Password strength validation
         try:
-            validate_password(password)
+            validate_password(password,user=User(username=username, email=email))
         except ValidationError as error:
-            for message in error.messages:
-                messages.error(request, message)
-            return redirect("register")
+            errors['password'] = error.messages
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
 
-        # 5. Create user
-        User.objects.create_user(
+        # 6. Role validation
+        if role not in ['student', 'trainer']:
+            non_field_errors.append("Invalid role selected.")
+            return render(
+                request,
+                "students/registration/register.html",
+                {
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }
+            )
+
+        # 7. Create user
+        user = User.objects.create_user(
             username=username,
             email=email,
-            password=password
+            password=password,
+            is_active=(role == 'student')
+        )
+
+        # 8. Create user profile
+        UserProfile.objects.create(
+            user=user,
+            role=role
         )
 
         messages.success(request, "Registration successful. Please login.")
         return redirect("login")
 
-    return render(request, "students/register.html")
+    return render(request, "students/registration/register.html")
 
 
 def login_view(request):
 
     if request.method == "POST":
-
         username = request.POST.get("username")
         password = request.POST.get("password")
 
+        profile = UserProfile.objects.filter(
+            user__username=username
+        ).first()
+
+        # Check whether account is locked
+        if profile and profile.locked_until:
+
+            if profile.locked_until > timezone.now():
+
+                # Audit Login attempted
+                AuditLog.objects.create(username=username,
+                                        event="Login Blocked",
+                                        details="Login attempted while account was locked.")
+                messages.error(
+                    request,
+                    "Account temporarily locked. Please try again later."
+                )
+                return render(
+                    request,
+                    "students/registration/login.html"
+                )
+
+            else:
+                profile.failed_login_attempts = 0
+                profile.locked_until = None
+                profile.save()
+
+        # Authenticate user
         user = authenticate(
             request,
             username=username,
@@ -232,6 +357,19 @@ def login_view(request):
         )
 
         if user is not None:
+
+            # Reset failed attempts after successful login
+            if profile:
+                profile.failed_login_attempts = 0
+                profile.locked_until = None
+                profile.save()
+
+            # Audit successful login
+            AuditLog.objects.create(
+            username=username,
+            event="Login Success",
+            details="User logged in successfully."
+)
             login(request, user)
             messages.success(request, "Login successful!")
 
@@ -257,10 +395,40 @@ def login_view(request):
                 return redirect('login')
 
         else:
-            messages.error(request, "Invalid username or password.")
 
-    return render(request, "students/login.html")
+            # Audit failed login
+            AuditLog.objects.create(
+                username=username,
+                event="Login Failed",
+                details="Invalid username or password."
+)
+            if profile:
+                profile.failed_login_attempts += 1
 
+                if profile.failed_login_attempts >= 5:
+                    profile.locked_until = (timezone.now() + timedelta(minutes=15))
+
+                    AuditLog.objects.create(
+                                username=username,
+                                event="Account Locked",
+                                details="Account locked for 15 minutes.")
+                    
+                    messages.error(
+                        request,
+                        "Too many failed attempts. Account locked for 15 minutes."
+                    )
+                else:
+                    messages.error(
+                        request,
+                        f"Invalid credentials. Attempts remaining: {5 - profile.failed_login_attempts}"
+                    )
+
+                profile.save()
+
+            else:
+                messages.error(request, "Invalid username or password.")
+
+    return render(request, "students/registration/login.html")
 
 
 def logout_view(request):
