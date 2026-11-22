@@ -54,6 +54,57 @@ class Student(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+class CourseMarks(models.Model):
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='course_marks'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='student_marks'
+    )
+    marks = models.FloatField(default=0)
+
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    reason = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('student', 'course')
+
+    def __str__(self):
+        return f"{self.student.name} - {self.course.course_name}"
+
+
+class MarksUpdateHistory(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    previous_marks = models.FloatField()
+    new_marks = models.FloatField()
+
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    updated_at = models.DateTimeField(auto_now_add=True)
+    reason = models.TextField()
+
+    def __str__(self):
+        return f"{self.student.name} - {self.course.course_name}"
+
+    
     
 class StudentProfile(models.Model):
     student = models.OneToOneField(
@@ -97,12 +148,85 @@ class UserProfile(models.Model):
         return f"{self.user.username} - {self.role}"
 
 # AuditLog model
+
 class AuditLog(models.Model):
 
+    ACTION_CHOICES = [
+        ('LOGIN', 'Login'),
+        ('LOGOUT', 'Logout'),
+        ('FAILED', 'Failed Login'),
+        ('CREATE', 'Create'),
+        ('UPDATE', 'Update'),
+        ('DELETE', 'Delete'),
+        ('MARKS_UPDATE', 'Marks Update'),
+        ('FEEDBACK_CREATE', 'Feedback Created'),
+        ('ACCOUNT_STATUS_CHANGE', 'Account Status Changed'),
+    ]
+
     username = models.CharField(max_length=150)
-    event = models.CharField(max_length=100)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs'
+    )
+
+    event = models.CharField(
+        max_length=100,
+        choices=ACTION_CHOICES
+    )
+
+    affected_object = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
     details = models.TextField(blank=True, null=True)
+
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True
+    )
+
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.username} - {self.event}"
+
+
+# feedback model
+class Feedback(models.Model):
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
+
+    trainer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='given_feedbacks'
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
+
+    message = models.TextField()
+    rating = models.PositiveIntegerField(
+    default=5,
+    choices=[(i, i) for i in range(1, 6)]
+)
+    is_visible = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student.name} - {self.course.course_name}"   

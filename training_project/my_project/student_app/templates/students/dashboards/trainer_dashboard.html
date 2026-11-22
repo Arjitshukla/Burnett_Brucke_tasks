@@ -74,52 +74,169 @@
             {% else %}
                 <p class="text-muted">No assigned courses available.</p>
             {% endif %}
-
         </div>
     </div>
 
-    <!-- Students Table -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h5>My Assigned Students</h5>
-        </div>
+ 
+<!-- Students Table -->
+<div class="card shadow-sm mb-4">
 
-        <div class="card-body table-responsive">
+    <div class="card-header">
+        <h5>My Assigned Students</h5>
+    </div>
 
-            {% if students %}
-            <table class="table table-hover">
-                <thead>
+    <div class="card-body table-responsive">
+
+        {% if student_rows %}
+
+        <table class="table table-hover table-bordered">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Course</th>
+                    <th>Marks</th>
+                    <th>Result</th>
+                    <th>Latest Updated By</th>
+                    <th>Updated At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for row in student_rows %}
+
+                    {% for item in row.course_rows %}
+
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Marks</th>
-                        <th>Result</th>
-                    </tr>
-                </thead>
+                        <td>{{ row.student.name }}</td>
 
-                <tbody>
-                    {% for student in students %}
-                    <tr>
-                        <td>{{ student.name }}</td>
-                        <td>{{ student.email }}</td>
-                        <td>{{ student.marks }}</td>
+                        <td>{{ row.student.email }}</td>
+
+                        <td>{{ item.course.course_name }}</td>
+
                         <td>
-                            {% if student.marks >= 40 %}
-                                <span class="badge bg-success">Pass</span>
+                            {% if item.marks_record %}
+                                {{ item.marks_record.marks }}
                             {% else %}
-                                <span class="badge bg-danger">Fail</span>
+                                Not Updated
                             {% endif %}
                         </td>
+
+                        <td>
+                            {% if item.marks_record %}
+                                {% if item.marks_record.marks >= 40 %}
+                                    <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Fail</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.marks_record %}
+                                {{ item.marks_record.updated_by.username|default:"N/A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.marks_record %}
+                                {{ item.marks_record.updated_at|date:"d M Y, h:i A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+
+                       
+<td>
+    <a href="{% url 'update_course_marks' row.student.id item.course.id %}"
+       class="btn btn-warning btn-sm mb-1">
+        Update Marks
+    </a>
+
+    <a href="{% url 'give_feedback' row.student.id %}"
+       class="btn btn-primary btn-sm mb-1">
+        Give Feedback
+    </a>
+</td>
+
                     </tr>
+
                     {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-                <p class="text-muted">No assigned students available.</p>
-            {% endif %}
 
-        </div>
+                {% empty %}
+
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            No assigned students available.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+            <div class="alert alert-info">
+                No assigned students available.
+            </div>
+
+        {% endif %}
+
     </div>
-
 </div>
+
+<hr>
+
+<h4>My Feedback</h4>
+
+{% if feedbacks %}
+    <div class="row">
+        {% for feedback in feedbacks %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5>{{ feedback.student.name }}</h5>
+
+                        <p>
+                            <strong>Course:</strong>
+                            {{ feedback.course.course_name }}
+                        </p>
+
+                        <p>
+                            <strong>Rating:</strong>
+                            {{ feedback.rating }}/5
+                        </p>
+
+                        <p>{{ feedback.message }}</p>
+
+                        <small class="text-muted">
+                            {{ feedback.created_at|date:"d M Y" }}
+                        </small>
+
+                        <br><br>
+
+                        <a href="{% url 'edit_feedback' feedback.id %}"
+                           class="btn btn-primary btn-sm">
+                            Edit Feedback
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No feedback given yet.</p>
+{% endif %}
 {% endblock %}

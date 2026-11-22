@@ -1,0 +1,75 @@
+{% extends 'students/base.html' %}
+
+{% block title %}All Feedback{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>All Student Feedback</h2>
+
+    {% if feedbacks %}
+        <div class="row">
+            {% for feedback in feedbacks %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <h5>{{ feedback.student.name }}</h5>
+
+                            <p>
+                                <strong>Course:</strong>
+                                {{ feedback.course.course_name }}
+                            </p>
+
+                            <p>
+                                <strong>Trainer:</strong>
+                                {{ feedback.trainer.username|default:"Deleted trainer" }}
+                            </p>
+
+                            <p>
+                                <strong>Rating:</strong>
+                                {{ feedback.rating }}/5
+                            </p>
+
+                            <p>{{ feedback.message }}</p>
+
+                            <p>
+                                <strong>Visibility:</strong>
+
+                                {% if feedback.is_visible %}
+                                    <span class="badge bg-success">Visible</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Hidden</span>
+                                {% endif %}
+                            </p>
+
+                            <form method="POST"
+                                action="{% url 'toggle_feedback_visibility' feedback.id %}">
+                                {% csrf_token %}
+
+                                {% if feedback.is_visible %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Hide Feedback
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        Make Visible
+                                    </button>
+                                {% endif %}
+                            </form>
+
+                            <small class="text-muted">
+                                {{ feedback.created_at|date:"d M Y, h:i A" }}
+                            </small>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No feedback available.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

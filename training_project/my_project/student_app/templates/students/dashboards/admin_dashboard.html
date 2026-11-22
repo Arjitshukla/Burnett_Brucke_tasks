@@ -8,6 +8,12 @@
 <div class="container mt-4">
 
     <h2>Administrator Dashboard</h2>
+    <a href="{% url 'audit_logs' %}" class="btn btn-dark">
+    View Audit Logs
+    <a href="{% url 'all_feedback' %}" class="btn btn-info">
+    View All Feedback
+</a>
+</a>
     <p>Welcome, {{ request.user.username }}!</p>
 
     <div class="alert alert-primary">
@@ -62,6 +68,8 @@
                         <th>Role</th>
                         <th>Date Joined</th>
                         <th>Last Login</th>
+                        <th>Status</th>
+                        <th>Action</th> 
                     </tr>
                 </thead>
 
@@ -83,7 +91,7 @@
                         </td>
                         <td>
                             {% if user.last_login %}
-                                {{ user.last_login|date:"d M Y, h:i A" }}
+                                {{ user.date_joined|date:"d M Y, h:i A" }}
                             {% else %}
                                 Never logged in
                             {% endif %}
@@ -91,10 +99,34 @@
                         <td>
                             {% if user.last_login %}
                                 {{ user.last_login|date:"d M Y, h:i A" }}
-                            {% else %}
+                            {% else %}  
                                 Never logged in
                             {% endif %}
                         </td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <form method="POST"
+                        action="{% url 'toggle_user_status' user.id %}">
+                        {% csrf_token %}
+
+                        {% if user.is_active %}
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Deactivate
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Activate
+                            </button>
+                        {% endif %}
+                    </form>
+                </td>
                     </tr>
                     {% endfor %}
                 </tbody>

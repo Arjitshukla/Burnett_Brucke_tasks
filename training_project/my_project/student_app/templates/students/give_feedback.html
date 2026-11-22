@@ -1,0 +1,30 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Give Feedback{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Give Feedback</h2>
+
+    <p>Student: <strong>{{ student.name }}</strong></p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">
+            Submit Feedback
+        </button>
+
+        <a href="{% url 'trainer_dashboard' %}" class="btn btn-secondary">
+            Back
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

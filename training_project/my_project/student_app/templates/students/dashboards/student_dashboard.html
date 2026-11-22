@@ -61,11 +61,51 @@
         {{ student.marks }}%
 
     </div>
+    <hr>
 </div>
+<hr>
+
+<h5>Feedback Received</h5>
+
+{% if feedbacks %}
+
+    {% for feedback in feedbacks %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+
+                <h6>Course: {{ feedback.course.course_name }}</h6>
+                <p>
+                    <strong>Rating:</strong> {{ feedback.rating }}/5
+                </p>
+
+                <p>
+                    <strong>Trainer:</strong>
+                    {{ feedback.trainer.username }}
+                </p>
+
+                <p>
+                    <strong>Feedback:</strong>
+                    {{ feedback.message }}
+                </p>
+
+                <small class="text-muted">
+                    {{ feedback.created_at|date:"d M Y, h:i A" }}
+                </small>
 
             </div>
         </div>
-        
+
+    {% endfor %}
+
+{% else %}
+
+    <p class="text-muted">No feedback received yet.</p>
+
+{% endif %}
+            </div>
+        </div>
+
 
     {% else %}
 

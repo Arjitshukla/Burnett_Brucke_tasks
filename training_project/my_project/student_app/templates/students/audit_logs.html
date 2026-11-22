@@ -1,0 +1,169 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Audit Logs{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Audit Logs</h2>
+    <p>Administrator Activity History</p>
+
+    <!-- Search and Filters -->
+    <form method="GET" class="card card-body mb-4">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <input type="text"
+                       name="search"
+                       class="form-control"
+                       placeholder="Search username or details"
+                       value="{{ search }}">
+            </div>
+
+            <div class="col-md-2">
+                <select name="event" class="form-select">
+                    <option value="">All Events</option>
+                    {% for value, label in events %}
+                        <option value="{{ value }}"
+                            {% if selected_event == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <input type="date"
+                       name="start_date"
+                       class="form-control"
+                       value="{{ start_date }}">
+            </div>
+
+            <div class="col-md-2">
+                <input type="date"
+                       name="end_date"
+                       class="form-control"
+                       value="{{ end_date }}">
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    Apply Filters
+                </button>
+
+                <a href="{% url 'audit_logs' %}"
+                   class="btn btn-secondary">
+                    Reset
+                </a>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- Audit Logs Table -->
+    <div class="card">
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Event</th>
+                        <th>Affected Object</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for log in page_obj %}
+
+                    <tr>
+                        <td>{{ log.username }}</td>
+
+                        <td>
+                            {% if log.event == 'CREATE' %}
+                                <span class="badge bg-success">CREATE</span>
+                            {% elif log.event == 'UPDATE' %}
+                                <span class="badge bg-primary">UPDATE</span>
+                            {% elif log.event == 'DELETE' %}
+                                <span class="badge bg-danger">DELETE</span>
+                            {% elif log.event == 'LOGIN' %}
+                                <span class="badge bg-info">LOGIN</span>
+                            {% elif log.event == 'FAILED' %}
+                                <span class="badge bg-warning text-dark">FAILED</span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    {{ log.event }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ log.affected_object|default:"-" }}</td>
+                        <td>{{ log.details|default:"-" }}</td>
+                        <td>{{ log.ip_address|default:"-" }}</td>
+                        <td>{{ log.timestamp|date:"d M Y, h:i A" }}</td>
+                    </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="card text-center border-0 bg-light p-4">
+                                    <div class="card-body">
+                                        <h5>No Audit Logs Found</h5>
+                                        <p class="text-muted mb-0">
+                                            No records match your search or filter criteria.
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-3">
+        <ul class="pagination">
+
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&search={{ search }}&event={{ selected_event }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                        Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&search={{ search }}&event={{ selected_event }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                        Next
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</div>
+
+{% endblock %}

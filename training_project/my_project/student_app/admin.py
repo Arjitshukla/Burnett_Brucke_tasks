@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Student, Department, StudentProfile, Course,UserProfile,AuditLog
+from .models import Student, Department, StudentProfile, Course,UserProfile,AuditLog,Feedback,CourseMarks,MarksUpdateHistory
 
 admin.site.register(Student)
 admin.site.register(Department)
@@ -18,10 +18,39 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'username', 'event', 'timestamp')
+    list_display = (
+        'id',
+        'username',
+        'event',
+        'affected_object',
+        'ip_address',
+        'timestamp',
+    )
 
-    list_filter = ('event', 'timestamp')
+    list_filter = (
+        'event',
+        'timestamp',
+    )
 
-    search_fields = ('username', 'event')
+    search_fields = (
+        'username',
+        'details',
+        'affected_object',
+        'ip_address',
+    )
 
-    readonly_fields = ('username', 'event', 'details', 'timestamp')
+    readonly_fields = (
+        'username',
+        'user',
+        'event',
+        'affected_object',
+        'details',
+        'ip_address',
+        'timestamp',
+    )
+
+    ordering = ('-timestamp',)
+
+admin.site.register(Feedback)
+admin.site.register(CourseMarks)
+admin.site.register(MarksUpdateHistory)

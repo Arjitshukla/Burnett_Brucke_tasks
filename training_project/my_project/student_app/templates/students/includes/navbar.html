@@ -41,11 +41,25 @@
                         </a>
                     </li>
 
+
+                    {% if user.profile.role == 'admin' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'add_student' %}">
                             Add Student
                         </a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'audit_logs' %}">
+                            Audit Logs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'all_feedback' %}">
+                            All Feedback
+                        </a>
+                    </li>
+                    {% endif %}
+
 
                 {% endif %}
 
@@ -66,12 +80,28 @@
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        {% if user.profile.role == 'admin' %}
 
-                            <li>
-                                <a class="dropdown-item" href="{% url 'student_dashboard' %}">
-                                    Dashboard
-                                </a>
-                            </li>
+                            <a class="dropdown-item" href="{% url 'admin_dashboard' %}">
+                                Admin Dashboard
+                            </a>
+
+                        {% elif user.profile.role == 'trainer' %}
+
+                            <a class="dropdown-item" href="{% url 'trainer_dashboard' %}">
+                                Trainer Dashboard
+                            </a>
+
+                        {% elif user.profile.role == 'student' %}
+
+                            <a class="dropdown-item" href="{% url 'student_dashboard' %}">
+                                Student Dashboard
+                            </a>
+
+                        {% endif %}
+                    </li>
+
 
                             <li>
                                 <a class="dropdown-item" href="{% url 'password_change' %}">
