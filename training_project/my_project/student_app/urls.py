@@ -1,5 +1,36 @@
 from django.urls import path
-from . import views
+# from . import views
+from .views.auth_views import (
+    register_view,
+    login_view,
+    logout_view,
+)
+
+from .views.student_views import (
+    student_list,
+    add_student,
+    student_details,
+    edit_student,
+    delete_student,
+    student_dashboard,
+    dashboard
+)
+
+from .views.admin_views import (
+    admin_dashboard,
+    toggle_feedback_visibility,
+    toggle_user_status,
+    audit_logs_view,
+    all_feedback_view,
+    marks_history_view,
+)
+
+from .views.trainer_views import (
+    trainer_dashboard,
+    give_feedback,
+    update_course_marks,
+    edit_feedback,
+)
 
 from django.contrib.auth.views import (
     PasswordChangeView,
@@ -16,114 +47,102 @@ urlpatterns = [
     # 1. STUDENT CRUD OPERATIONS
     # ==========================================
 
-    path('', views.student_list, name='student_list'),
-    path('add/', views.add_student, name='add_student'),
-    path('<int:pk>/', views.student_details, name='student_detail'),
-    path('<int:pk>/edit/', views.edit_student, name='edit_student'),
-    path('<int:pk>/delete/', views.delete_student, name='delete_student'),
+    path('', student_list, name='student_list'),
+    path('add/', add_student, name='add_student'),
+    path('<int:pk>/', student_details, name='student_detail'),
+    path('<int:pk>/edit/', edit_student, name='edit_student'),
+    path('<int:pk>/delete/', delete_student, name='delete_student'),
 
 
     # ==========================================
     # 2. USER AUTHENTICATION & REGISTRATION
     # ==========================================
 
-    path('register/', views.register_view, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
+    path('register/', register_view, name='register'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
 
 
     # ==========================================
     # 3. GENERAL DASHBOARD
     # ==========================================
 
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/',
+          dashboard,
+            name='dashboard'),
 
     # ==========================================
     # 4. ADMIN DASHBOARD & USER MANAGEMENT
     # ==========================================
 
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-dashboard/',
+          admin_dashboard,
+            name='admin_dashboard'),
 
-    path(
-        'admin/user-status/<int:user_id>/',
-        views.toggle_user_status,
-        name='toggle_user_status'
-    ),
+    path('admin/user-status/<int:user_id>/',
+        toggle_user_status,
+          name='toggle_user_status'),
 
 
     # ==========================================
     # 5. ADMIN FEEDBACK MANAGEMENT
     # ==========================================
 
-    path(
-        'admin/all-feedback/',
-        views.all_feedback_view,
-        name='all_feedback'
-    ),
+    path('admin/all-feedback/',
+          all_feedback_view,
+            name='all_feedback'),
 
-    path(
-        'admin/feedback/visibility/<int:feedback_id>/',
-        views.toggle_feedback_visibility,
-        name='toggle_feedback_visibility'
-    ),
+    path('admin/feedback/visibility/<int:feedback_id>/',
+          toggle_feedback_visibility, 
+          name='toggle_feedback_visibility'),
 
 
     # ==========================================
     # 6. ADMIN AUDIT LOGS & MARKS HISTORY
     # ==========================================
 
-    path('audit-logs/', views.audit_logs_view, name='audit_logs'),
+    path('audit-logs/',
+          audit_logs_view,
+          name='audit_logs'),
 
-    path(
-        'admin/marks-history/',
-        views.marks_history_view,
-        name='marks_history'
-    ),
+    path('admin/marks-history/',
+          marks_history_view,
+            name='marks_history'),
 
 
     # ==========================================
     # 7. TRAINER DASHBOARD & FEEDBACK MANAGEMENT
     # ==========================================
 
-    path(
-        'trainer-dashboard/',
-        views.trainer_dashboard,
-        name='trainer_dashboard'
-    ),
+    path('trainer-dashboard/',
+          trainer_dashboard,
+            name='trainer_dashboard'),
 
-    path(
-        'trainer/feedback/<int:student_id>/',
-        views.give_feedback,
-        name='give_feedback'
-    ),
+    path('trainer/feedback/<int:student_id>/',
+          give_feedback,
+            name='give_feedback'),
 
-    path(
-        'trainer/feedback/edit/<int:feedback_id>/',
-        views.edit_feedback,
-        name='edit_feedback'
-    ),
+    path('trainer/feedback/edit/<int:feedback_id>/',
+          edit_feedback,
+            name='edit_feedback'),
 
 
     # ==========================================
     # 8. TRAINER MARKS MANAGEMENT
     # ==========================================
 
-    path(
-        'trainer/update-marks/<int:student_id>/<int:course_id>/',
-        views.update_course_marks,
-        name='update_course_marks'
-    ),
+    path('trainer/update-marks/<int:student_id>/<int:course_id>/',
+          update_course_marks,
+         name='update_course_marks'),
 
 
     # ==========================================
     # 9. STUDENT DASHBOARD
     # ==========================================
 
-    path(
-        'student-dashboard/',
-        views.student_dashboard,
-        name='student_dashboard'
-    ),
+    path('student-dashboard/',
+        student_dashboard,
+        name='student_dashboard'),
 
 
     # ==========================================

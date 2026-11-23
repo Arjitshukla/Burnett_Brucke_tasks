@@ -8,11 +8,7 @@
 <div class="container mt-4">
 
     <h2>Administrator Dashboard</h2>
-    <a href="{% url 'audit_logs' %}" class="btn btn-dark">
-    View Audit Logs
-    <a href="{% url 'all_feedback' %}" class="btn btn-info">
-    View All Feedback
-</a>
+
 </a>
     <p>Welcome, {{ request.user.username }}!</p>
 
@@ -49,8 +45,90 @@
                 </div>
             </div>
         </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm border-warning">
+                <div class="card-body">
+                    <h5>Total Trainer</h5>
+                    <h2>{{ total_trainers }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-body">
+                    <h5>Total Department</h5>
+                    <h2>{{ total_department }}</h2>
+                </div>
+            </div>
+        </div>
 
     </div>
+<!-- Quick Action -->
+
+<div class="container mt-4 mb-4">
+
+    <h3 class="mb-4">Admin Quick Actions</h3>
+
+    <div class="row g-3">
+
+        <!-- Add Student -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5>Add Student</h5>
+                    <p class="text-muted">Register a new student</p>
+                    <a href="{% url 'add_student' %}"
+                       class="btn btn-primary">
+                        Add Student
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Logs -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5>Audit Logs</h5>
+                    <p class="text-muted">View system activities</p>
+                    <a href="{% url 'audit_logs' %}"
+                       class="btn btn-dark">
+                        View Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Feedback -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5>All Feedback</h5>
+                    <p class="text-muted">Manage student feedback</p>
+                    <a href="{% url 'all_feedback' %}"
+                       class="btn btn-success">
+                        View Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marks History -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5>Marks History</h5>
+                    <p class="text-muted">Track marks updates</p>
+                    <a href="{% url 'marks_history' %}"
+                       class="btn btn-warning">
+                        View History
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
     <!-- Recent Users -->
     <div class="card shadow-sm mb-4">

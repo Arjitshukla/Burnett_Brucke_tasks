@@ -1,31 +1,68 @@
 
 {% extends 'students/base.html' %}
 
+{% block title %}Edit Student{% endblock %}
+
 {% block content %}
 
-<h1>Edit Student</h1>
+<div class="container mt-5 mb-5">
 
-<hr>
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
 
-<form method="POST" novalidate>
-    {% csrf_token %}
-    {% include 'students/includes/form_errors.html' %}
+            <div class="card shadow border-0">
 
-    {{ form.as_p }}
+                <!-- Header -->
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit Student
+                    </h3>
+                    <small>Update student information</small>
+                </div>
 
-    <button type="submit">Update Student</button>
-</form>
+                <!-- Form Body -->
+                <div class="card-body p-4">
 
-<hr>
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
 
-<a href="{% url 'student_detail' student.pk %}">
-    Back to Student Details
-</a>
+                        {% include 'students/includes/form_errors.html' %}
 
-|
+                        {{ form.as_p }}
 
-<a href="{% url 'student_list' %}">
-    Back to Student List
-</a>
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Update Student
+                            </button>
+
+                            <a href="{% url 'student_detail' student.pk %}"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-person me-1"></i>
+                                Student Details
+                            </a>
+
+                            <a href="{% url 'student_list' %}"
+                               class="btn btn-outline-dark">
+                                <i class="bi bi-list me-1"></i>
+                                Student List
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}

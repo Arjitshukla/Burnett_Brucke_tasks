@@ -1,26 +1,70 @@
+
 {% extends 'students/base.html' %}
 
 {% block title %}Edit Feedback{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Edit Feedback</h2>
 
-    <p>
-        Student: <strong>{{ feedback.student.name }}</strong>
-    </p>
+<div class="container mt-5 mb-5">
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
 
-        <button type="submit" class="btn btn-primary">
-            Update Feedback
-        </button>
+            <div class="card shadow border-0">
 
-        <a href="{% url 'trainer_dashboard' %}" class="btn btn-secondary">
-            Back
-        </a>
-    </form>
+                <!-- Header -->
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit Feedback
+                    </h3>
+                    <small>Update student feedback details</small>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+
+                    <!-- Student Information -->
+                    <div class="alert alert-light border mb-4">
+                        <small class="text-muted">Student Name</small>
+                        <h5 class="mb-0">
+                            {{ feedback.student.name }}
+                        </h5>
+                    </div>
+
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        {% include 'students/includes/form_errors.html' %}
+
+                        {{ form.as_p }}
+
+                        <!-- Buttons -->
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Update Feedback
+                            </button>
+
+                            <a href="{% url 'trainer_dashboard' %}"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Dashboard
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
 </div>
+
 {% endblock %}

@@ -3,25 +3,57 @@
 
 {% block content %}
 
-<h1>Add New Student</h1>
+<div class="container mt-5 mb-5">
 
-<hr>
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
 
-<form method="POST" novalidate>
-    {% csrf_token %}
-    {% include 'students/includes/form_errors.html' %}
+            <div class="card shadow border-0">
 
-    {{ form.as_p }}
+                <!-- Header -->
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Add New Student
+                    </h3>
+                    <small>Enter student details below</small>
+                </div>
 
-    <button type="submit">
-        Add Student
-    </button>
-</form>
+                <!-- Form Body -->
+                <div class="card-body p-4">
 
-<hr>
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
 
-<a href="{% url 'student_list' %}">
-    Back to Student List
-</a>
+                        {% include 'students/includes/form_errors.html' %}
+
+                        {{ form.as_p }}
+
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-person-check me-1"></i>
+                                Add Student
+                            </button>
+
+                            <a href="{% url 'student_list' %}"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Student List
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}
