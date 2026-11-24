@@ -9,7 +9,6 @@ from student_app.models import (
     AuditLog,
     Student,
     Course,
-    Feedback,
     CourseMarks,
 )
 

@@ -1,8 +1,20 @@
 
 {% extends 'students/base.html' %}
 
-{% block title %}Marks Update History{% endblock %}
+{% block title %}Marks Update History | Student Training Portal{% endblock %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
 
+        <li class="breadcrumb-item active" aria-current="page">
+            Marks Update History
+        </li>
+    </ol>
+</nav>
+{% endblock %}
 {% block content %}
 
 <div class="container mt-4">

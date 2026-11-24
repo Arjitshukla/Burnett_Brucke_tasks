@@ -1,8 +1,25 @@
 
 {% extends 'students/base.html' %}
 
-{% block title %}Edit Feedback{% endblock %}
+{% block title %}Edit Feedback | Student Training Portal{% endblock %}
 
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
+
+        <li class="breadcrumb-item">
+            <a href="{% url 'feedback_list' %}">Feedback</a>
+        </li>
+
+        <li class="breadcrumb-item active" aria-current="page">
+            Edit Feedback
+        </li>
+    </ol>
+</nav>
+{% endblock %}
 {% block content %}
 
 <div class="container mt-5 mb-5">
@@ -32,7 +49,7 @@
                         </h5>
                     </div>
 
-                    <form method="POST" novalidate>
+                    <form method="POST" novalidate id="editFeedbackForm">
                         {% csrf_token %}
 
                         {% include 'students/includes/form_errors.html' %}
@@ -43,7 +60,7 @@
                         <div class="d-flex flex-wrap gap-2 mt-4">
 
                             <button type="submit"
-                                    class="btn btn-primary px-4">
+                                    class="btn btn-primary px-4" id="updateFeedbackBtn">
                                 <i class="bi bi-check-circle me-1"></i>
                                 Update Feedback
                             </button>
@@ -67,4 +84,17 @@
 
 </div>
 
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.getElementById('editFeedbackForm').addEventListener('submit', function () {
+        const button = document.getElementById('updateFeedbackBtn');
+
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Updating Feedback...
+        `;
+    });
+</script>
 {% endblock %}

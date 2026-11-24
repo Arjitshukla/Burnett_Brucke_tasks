@@ -1,7 +1,23 @@
  {% extends 'students/base.html' %}
 
-{% block title %}Give Feedback{% endblock %}
+{% block title %}Give Feedback | Student Training Portal{% endblock %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
 
+        <li class="breadcrumb-item">
+            <a href="{% url 'feedback_list' %}">Feedback</a>
+        </li>
+
+        <li class="breadcrumb-item active" aria-current="page">
+            Give Feedback
+        </li>
+    </ol>
+</nav>
+{% endblock %}
 {% block content %}
 
 <div class="container mt-5 mb-5">
@@ -43,7 +59,7 @@
                     </div>
 
                     <!-- Feedback Form -->
-                    <form method="POST">
+                    <form method="POST" id="giveFeedbackForm">
                         {% csrf_token %}
 
                         {{ form.non_field_errors }}
@@ -81,7 +97,7 @@
                                 Back
                             </a>
 
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn btn-primary px-4" id="submitFeedbackBtn">
                                 <i class="bi bi-send me-1"></i>
                                 Submit Feedback
                             </button>
@@ -98,4 +114,17 @@
 
 </div>
 
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.getElementById('giveFeedbackForm').addEventListener('submit', function () {
+        const button = document.getElementById('submitFeedbackBtn');
+
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Submitting Feedback...
+        `;
+    });
+</script>
 {% endblock %}

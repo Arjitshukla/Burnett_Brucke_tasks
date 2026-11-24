@@ -428,6 +428,103 @@ Record the generated commit ID in the project submission details.
 - Django Automated Testing.
 
 ---
+## 14. Release and Deployment Setup
+
+### Environment Variables
+
+Create a `.env` file in the project root (same directory as `manage.py`).
+
+```env
+SECRET_KEY=your-generated-secret-key
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
+
+EMAIL_HOST_USER=your-email@example.com
+EMAIL_HOST_PASSWORD=your-email-app-password
+```
+
+**Important:** Never commit the `.env` file or expose real credentials.
+
+Add the following to `.gitignore`:
+
+```gitignore
+.env
+db.sqlite3
+clean_test.sqlite3
+```
+
+### Production Settings
+
+A separate `production.py` settings file is maintained.
+
+- `DEBUG = False`
+- `SECRET_KEY` is loaded from environment variables.
+- `ALLOWED_HOSTS` is configured through environment variables.
+- Database configuration uses environment variables.
+- Static files are collected into `staticfiles/`.
+
+Run the production configuration check:
+
+```bash
+python manage.py check --settings=my_project.production
+```
+
+### Static Files
+
+Collect static files using:
+
+```bash
+python manage.py collectstatic --settings=my_project.production
+```
+
+Static files are collected into the `staticfiles/` directory.
+
+### Database Migrations
+
+Apply database migrations:
+
+```bash
+python manage.py migrate --settings=my_project.production
+```
+
+Clean database migration was also tested using a separate SQLite database.
+
+### Load Sample Data
+
+Load demo data using the custom management command:
+
+```bash
+python manage.py load_sample_data
+```
+
+The command creates sample administrators, trainers, students, departments, courses, marks, feedback, and audit events.
+
+Demo credentials are intended only for local testing. Do not use demo passwords in production.
+
+### Run Automated Tests
+
+Execute the complete test suite:
+
+```bash
+python manage.py test
+```
+
+**Latest test result: 20 tests passed, 0 failures.**
+
+### Deployment Checklist
+
+- [ ] Configure production environment variables.
+- [ ] Set `DEBUG=False`.
+- [ ] Configure production `ALLOWED_HOSTS`.
+- [ ] Configure production email settings.
+- [ ] Apply database migrations.
+- [ ] Run `collectstatic`.
+- [ ] Run the complete test suite.
+- [ ] Configure HTTPS and secure cookies.
+- [ ] Configure a production web server and deployment environment.
+
 
 **Project:** Student Training Portal
 

@@ -1,0 +1,33 @@
+/* Registration Page */
+
+.registration-card {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Password Validation Errors */
+
+.password-error {
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Reset Password Page */
+
+.reset-password-card {
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Change Password Page */
+
+.change-password-card {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Delete Student Page */
+
+.delete-warning-icon {
+    font-size: 55px;
+}

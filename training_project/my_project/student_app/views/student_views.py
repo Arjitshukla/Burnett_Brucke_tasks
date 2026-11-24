@@ -1,19 +1,12 @@
-from django.utils import timezone
-from datetime import timedelta
 from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib import messages
-from ..models import Student,Department, Course, UserProfile,StudentProfile,AuditLog,Feedback,CourseMarks, MarksUpdateHistory
-from ..forms import StudentForm,FeedbackForm,CourseMarksForm
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from ..models import Student,Department, Course,StudentProfile,Feedback
+from ..forms import StudentForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
 from django.db.models import Avg,Q
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
-from functools import wraps
 from ..utils import create_audit_log
 from ..decorators import role_required
 
@@ -48,7 +41,7 @@ def student_list(request):
 ).prefetch_related('courses')
     
     students = base_students
-    active_students = base_students.filter(is_active=True).order_by('-id')[:6]
+    active_students = base_students.filter(is_active=True).order_by('-id')
     total_active_student = active_students.count()
     total_students = base_students.count()
 
@@ -138,6 +131,7 @@ def add_student(request):
 
 # STUDENTS DETAILS VIEW
 @login_required 
+@role_required(['admin','student'])
 def student_details(request, pk):
 
     role = request.user.profile.role
@@ -286,8 +280,6 @@ def student_dashboard(request):
             'feedbacks': feedbacks,
         }
     )
-
-
 
 
 def dashboard(request):

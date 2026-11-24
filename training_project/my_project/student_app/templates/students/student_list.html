@@ -1,8 +1,23 @@
 
 {% extends 'students/base.html' %}
 
-{% block title %}Student Management System{% endblock %}
+{% block title %}Student Management System | Student Training Portal{% endblock %}
 
+
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
+
+        <li class="breadcrumb-item active" aria-current="page">
+            Students
+        </li>
+    </ol>
+</nav>
+{% endblock %}
 {% block content %}
 
 <div class="container-fluid py-4">

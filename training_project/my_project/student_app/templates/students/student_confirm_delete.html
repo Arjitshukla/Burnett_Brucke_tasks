@@ -1,8 +1,22 @@
 
 {% extends 'students/base.html' %}
 
-{% block title %}Delete Student{% endblock %}
-
+{% block title %}Delete Student | Student Training Portal{% endblock %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'student_list' %}">Students</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Delete Student
+        </li>
+    </ol>
+</nav>
+{% endblock %}
 {% block content %}
 
 <div class="container mt-5 mb-5">
@@ -24,8 +38,7 @@
 
                     <!-- Warning Icon -->
                     <div class="mb-3">
-                        <i class="bi bi-trash3 text-danger"
-                           style="font-size: 55px;"></i>
+                        <i class="bi bi-trash3 text-danger delete-warning-icon "></i>
                     </div>
 
                     <h5 class="fw-bold mb-2">

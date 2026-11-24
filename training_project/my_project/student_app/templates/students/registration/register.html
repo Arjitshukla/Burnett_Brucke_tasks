@@ -1,12 +1,12 @@
 
 {% extends 'students/base.html' %}
 
-{% block title %}User Registration{% endblock %}
+{% block title %}User Registration | Student Training Portal{% endblock %}
 
 {% block content %}
 
 <div class="container d-flex justify-content-center mt-5">
-<div class="card shadow" style="width: 100%; max-width: 500px;">
+<div class="card shadow registration-card">
     <div class="card-header text-center">
             <h2>Create Account</h2>
         </div>
@@ -75,7 +75,7 @@
                 required
             >
             {% if errors.password %}
-                <div class="text-danger small mt-1" style="white-space: normal; overflow-wrap: break-word;">
+                <div class="text-danger small mt-1" password-error">
                     {% for error in errors.password %}
                         <p class="mb-1">{{ error }}</p>
                     {% endfor %}

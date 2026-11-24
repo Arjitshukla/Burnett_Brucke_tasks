@@ -11,6 +11,9 @@
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
         >
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -18,22 +21,16 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
 
             <ul class="navbar-nav me-auto">
-                  <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">
-                            home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">
-                            about
-                        </a>
-                    </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">
-                            Dashboard
-                        </a>
-                    </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'about' %}">About</a>
+                </li>
+                                {% if user.is_authenticated %}
+                   
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'student_list' %}">
@@ -43,84 +40,79 @@
 
                 {% endif %}
 
+
+                {% if user.is_authenticated and user.profile.role == 'admin' or user.is_authenticated and user.profile.role == 'trainer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'student_list' %}">
+                        Students
+                    </a>
+                </li>
+                {% endif %}
+
             </ul>
 
             <ul class="navbar-nav">
 
                 {% if user.is_authenticated %}
 
-                    <li class="nav-item dropdown">
+                <li class="nav-item dropdown">
 
-                        <a class="nav-link dropdown-toggle"
-                           href="#"
-                           role="button"
-                           data-bs-toggle="dropdown"
-                           aria-expanded="false">
-                            Welcome, {{ user.username }}
-                        </a>
+                    <a class="nav-link dropdown-toggle"
+                       href="#"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Welcome, {{ user.username }}
+                    </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        {% if user.profile.role == 'admin' %}
+                    <ul class="dropdown-menu dropdown-menu-end">
 
-                            <a class="dropdown-item" href="{% url 'admin_dashboard' %}">
-                                Admin Dashboard
-                            </a>
-
-                        {% elif user.profile.role == 'trainer' %}
-
-                            <a class="dropdown-item" href="{% url 'trainer_dashboard' %}">
-                                Trainer Dashboard
-                            </a>
-
-                        {% elif user.profile.role == 'student' %}
-
-                            <a class="dropdown-item" href="{% url 'student_dashboard' %}">
-                                Student Dashboard
-                            </a>
-
-                        {% endif %}
-                    </li>
-
-
-                            <li>
-                                <a class="dropdown-item" href="{% url 'password_change' %}">
-                                    Change Password
+                        <li>
+                            {% if user.profile.role == 'admin' %}
+                                <a class="dropdown-item" href="{% url 'admin_dashboard' %}">
+                                    Admin Dashboard
                                 </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item" href="{% url 'logout' %}">
-                                    Logout
+                            {% elif user.profile.role == 'trainer' %}
+                                <a class="dropdown-item" href="{% url 'trainer_dashboard' %}">
+                                    Trainer Dashboard
                                 </a>
-                            </li>
+                            {% elif user.profile.role == 'student' %}
+                                <a class="dropdown-item" href="{% url 'student_dashboard' %}">
+                                    Student Dashboard
+                                </a>
+                            {% endif %}
+                        </li>
 
-                        </ul>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'password_change' %}">
+                                Change Password
+                            </a>
+                        </li>
 
-                    </li>
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'logout' %}">
+                                Logout
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
 
                 {% else %}
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">
-                            Login
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">
-                            Register
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
 
                 {% endif %}
 
             </ul>
-
         </div>
     </div>
 </nav>
