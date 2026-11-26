@@ -230,8 +230,8 @@ The main project contains `manage.py`, project settings, and the root URL config
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone <(https://github.com/Arjitshukla/Burnett_Brucke_tasks.git)>
+cd training_project/my_project/
 ```
 
 Navigate to the directory containing `manage.py`.
