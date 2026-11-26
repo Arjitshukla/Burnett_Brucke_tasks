@@ -35,10 +35,11 @@ def student_list(request):
     else:
         return HttpResponseForbidden("Access Denied")
     # optimise Query
+
     base_students = base_students.select_related(
     'department',
     'user'
-).prefetch_related('courses')
+).prefetch_related('courses')   
     
     students = base_students
     active_students = base_students.filter(is_active=True).order_by('-id')
@@ -81,16 +82,16 @@ def student_list(request):
         students = students.filter(marks__lt=40)
 
     #pagination Implements
+    students = students.order_by('-id')
     paginator = Paginator(students, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
-
     context = {
         'students': page_obj,
         'page_obj': page_obj,
         'active_students': active_students,
         'total_count': total_students,
-        'departments': Department.objects.all(),
-        'courses': Course.objects.all(),
+        'departments': Department.objects.values('id', 'name'),
+        'courses': Course.objects.values('id', 'course_name','code'),
         'search': search,
         'selected_department': department_id,
         'selected_course': course_id,

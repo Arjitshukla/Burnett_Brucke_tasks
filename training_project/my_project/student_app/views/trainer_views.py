@@ -6,10 +6,14 @@ from django.http import HttpResponseForbidden
 from ..utils import create_audit_log
 from ..decorators import role_required
 from ..forms import FeedbackForm,CourseMarksForm
+# servics 
+from ..services.dashboard_services import get_trainer_student_rows
+from ..services.marks_services import update_student_course_marks
+from ..services.feedback_services import create_student_feedback,update_student_feedback
 
 
 
-# Trainer Dashboar
+# Trainer Dashboard
 @login_required
 @role_required(['trainer'])
 def trainer_dashboard(request):
@@ -20,37 +24,15 @@ def trainer_dashboard(request):
     )
 
     # Get students assigned to trainer's courses
+    # Prefetch courses, marks records and updated_by users
     students = Student.objects.filter(
         courses__trainer=request.user
-    ).distinct()
-
-    # Prepare student and course-wise marks data
-    student_rows = []
-
-    for student in students:
-
-        assigned_courses = student.courses.filter(
-            trainer=request.user
-        )
-
-        course_rows = []
-
-        for course in assigned_courses:
-
-            marks_record = CourseMarks.objects.filter(
-                student=student,
-                course=course
-            ).select_related('updated_by').first()
-
-            course_rows.append({
-                'course': course,
-                'marks_record': marks_record
-            })
-
-        student_rows.append({
-            'student': student,
-            'course_rows': course_rows
-        })
+    ).distinct().prefetch_related(
+        'courses',
+        'course_marks__updated_by'
+    )
+    # Prepare student and course-wise marks data using service
+    student_rows = get_trainer_student_rows(students, request.user)
 
     # Get trainer's feedback
     feedbacks = Feedback.objects.filter(
@@ -102,22 +84,14 @@ def give_feedback(request, student_id):
 
         if form.is_valid():
 
-            feedback = form.save(commit=False)
-
-            # Verify selected course belongs to this trainer and student
-            if not trainer_courses.filter(id=feedback.course_id).exists():
+            if not trainer_courses.filter(id=form.cleaned_data['course'].id).exists():
                 return HttpResponseForbidden("Invalid course selection.")
-
-            feedback.student = student
-            feedback.trainer = request.user
-            feedback.save()
-
-            create_audit_log(
-                request,
-                "FEEDBACK_CREATE",
-                "Trainer created feedback for student.",
-                affected_object=f"Feedback: {student.name}",
-                user=request.user
+            # feedback_services
+            create_student_feedback(
+                student,
+                request.user,
+                form,
+                request
             )
 
             messages.success(request, "Feedback submitted successfully!")
@@ -164,6 +138,7 @@ def update_course_marks(request, student_id, course_id):
         course=course
     ).first()
 
+    previous_marks = course_marks.marks if course_marks else 0
     if request.method == 'POST':
         form = CourseMarksForm(
             request.POST,
@@ -171,32 +146,15 @@ def update_course_marks(request, student_id, course_id):
         )
 
         if form.is_valid():
-            previous_marks = (
-                course_marks.marks if course_marks else 0
-            )
-
-            marks_record = form.save(commit=False)
-            marks_record.student = student
-            marks_record.course = course
-            marks_record.updated_by = request.user
-            marks_record.save()
-
-            MarksUpdateHistory.objects.create(
-                student=student,
-                course=course,
-                previous_marks=previous_marks,
-                new_marks=marks_record.marks,
-                updated_by=request.user,
-                reason=marks_record.reason
-            )
-
-            create_audit_log(
+            # marks_services
+            update_student_course_marks(
+                student,
+                course,
+                form,
+                request.user,
                 request,
-                "MARKS_UPDATE",
-                f"Marks changed from {previous_marks} to {marks_record.marks}.",
-                affected_object=f"{student.name} - {course.course_name}",
-                user=request.user
-            )
+                previous_marks
+          )
 
             messages.success(request, "Marks updated successfully!")
             return redirect('trainer_dashboard')
@@ -230,15 +188,13 @@ def edit_feedback(request, feedback_id):
         form = FeedbackForm(request.POST, instance=feedback)
 
         if form.is_valid():
-            form.save()
-
-            create_audit_log(
+            # feedback_services
+            update_student_feedback(
+                feedback,
+                form,
                 request,
-                "UPDATE",
-                "Trainer updated feedback.",
-                affected_object=f"Feedback: {feedback.student.name}",
-                user=request.user
-            )
+                request.user
+    )
 
             messages.success(request, "Feedback updated successfully!")
             return redirect('trainer_dashboard')

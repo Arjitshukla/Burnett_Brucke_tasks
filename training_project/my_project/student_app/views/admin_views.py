@@ -26,7 +26,8 @@ def admin_dashboard(request):
         'total_department': Department.objects.count(),
         'total_trainers': total_trainers,
 
-        'recent_users': User.objects.order_by('-date_joined')[:5],
+        # 'recent_users': User.objects.order_by('-date_joined')[:5],
+        'recent_users': User.objects.select_related('profile').order_by('-date_joined')[:5],
         'recent_students': Student.objects.order_by('-id')[:5],
         'recent_courses': Course.objects.order_by('-id')[:5],
     }
